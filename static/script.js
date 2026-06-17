@@ -26,6 +26,10 @@ const errorMessage = document.getElementById('error-message');
 const emptyState = document.getElementById('empty-state');
 const retryBtn = document.getElementById('retry-btn');
 const resetFiltersBtn = document.getElementById('reset-filters-btn');
+const themeToggle = document.getElementById('theme-toggle');
+const themeIcon = document.getElementById('theme-icon');
+const themeText = document.getElementById('theme-text');
+const exportCsvBtn = document.getElementById('export-csv-btn');
 
 // Stats Elements
 const statTotal = document.querySelector('#stat-total .stat-value');
@@ -57,6 +61,7 @@ if (progressCircle) {
 
 // Initialize application on load
 document.addEventListener('DOMContentLoaded', () => {
+    initializeTheme();
     fetchNotes(false);
     setupEventListeners();
 });
@@ -99,6 +104,10 @@ function setupEventListeners() {
     
     // Reset filters
     resetFiltersBtn.addEventListener('click', resetFilters);
+    
+    // Theme toggle & CSV Export
+    if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
+    if (exportCsvBtn) exportCsvBtn.addEventListener('click', exportToCSV);
     
     // Modal buttons
     closeTweetBtn.addEventListener('click', hideTweetModal);
@@ -319,7 +328,12 @@ function renderNotes() {
                     <i class="fa-regular fa-calendar"></i>
                     <h2>${entry.date}</h2>
                 </div>
-                ${entry.link ? `<a href="${entry.link}" target="_blank" class="original-link-btn">docs <i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : ''}
+                <div class="card-header-actions" style="display: flex; gap: 0.75rem; align-items: center;">
+                    <button class="action-btn" onclick="copyCardContent('${escapeJSString(entry.date)}')">
+                        <i class="fa-regular fa-copy"></i> Copy Card
+                    </button>
+                    ${entry.link ? `<a href="${entry.link}" target="_blank" class="original-link-btn">docs <i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : ''}
+                </div>
             </div>
         `;
         
@@ -521,4 +535,98 @@ function escapeJSString(str) {
         .replace(/"/g, '&quot;')
         .replace(/\n/g, '\\n')
         .replace(/\r/g, '\\r');
+}
+
+// Copy Card Content (All updates inside a single card)
+function copyCardContent(date) {
+    const entry = releaseNotes.find(e => e.date === date);
+    if (!entry) return;
+    
+    let text = `📅 BigQuery Release Notes - ${entry.date}\n`;
+    text += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+    
+    entry.updates.forEach((up, idx) => {
+        text += `[${up.type.toUpperCase()}]\n`;
+        text += `${up.text_only}\n`;
+        if (idx < entry.updates.length - 1) {
+            text += `\n----------------------------------------\n\n`;
+        }
+    });
+    
+    if (entry.link) {
+        text += `\n\n🔗 Full Release Notes: ${entry.link}`;
+    }
+    
+    navigator.clipboard.writeText(text)
+        .then(() => showToast('Full card content copied!'))
+        .catch(err => console.error('Copy failed', err));
+}
+
+// Export Filtered Release Notes to CSV
+function exportToCSV() {
+    if (filteredNotes.length === 0) {
+        showToast('No notes to export!');
+        return;
+    }
+    
+    const rows = [
+        ["Date", "Type", "Description", "Link"]
+    ];
+    
+    filteredNotes.forEach(entry => {
+        const date = entry.date;
+        const link = entry.link || '';
+        
+        entry.updates.forEach(up => {
+            const type = up.type;
+            const desc = up.text_only;
+            rows.push([date, type, desc, link]);
+        });
+    });
+    
+    const csvString = rows.map(row => 
+        row.map(value => `"${value.replace(/"/g, '""')}"`).join(",")
+    ).join("\n");
+    
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    
+    const timestamp = new Date().toISOString().slice(0, 10);
+    link.setAttribute("download", `bigquery_release_notes_${timestamp}.csv`);
+    document.body.appendChild(link);
+    
+    link.click();
+    document.body.removeChild(link);
+    showToast('Exported CSV successfully!');
+}
+
+// Initialize Theme Mode
+function initializeTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const isLight = savedTheme === 'light';
+    if (isLight) {
+        document.body.classList.add('light-theme');
+    }
+    updateThemeUI(isLight);
+}
+
+// Toggle Theme Mode
+function toggleTheme() {
+    const isLight = document.body.classList.toggle('light-theme');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    updateThemeUI(isLight);
+}
+
+// Update Theme Switcher Button UI
+function updateThemeUI(isLight) {
+    if (!themeIcon || !themeText) return;
+    if (isLight) {
+        themeIcon.className = 'fa-solid fa-moon';
+        themeText.textContent = 'Dark Mode';
+    } else {
+        themeIcon.className = 'fa-solid fa-sun';
+        themeText.textContent = 'Light Mode';
+    }
 }
