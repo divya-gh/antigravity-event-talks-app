@@ -8,6 +8,8 @@ An elegant, high-fidelity developer dashboard that parses, caches, and visualize
 
 Designed with a premium **dark-space glassmorphism** aesthetic, glowing status badges, and dynamic animations.
 
+![BigQuery Release Pulse Preview](static/dashboard_preview.jpg)
+
 ---
 
 ## 🌟 Key Features
