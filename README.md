@@ -102,3 +102,17 @@ The application will start running at:
   * <span style="color:#ffb703">■</span> **Issues** (Warm Gold)
   * <span style="color:#bd00ff">■</span> **Announcements** (Purple)
   * <span style="color:#ff4d6d">■</span> **Deprecations** (Rose Red)
+
+---
+
+## 🔮 Future Roadmap & UX Improvements
+
+Planned enhancements to elevate usability, accessibility, and fidelity:
+
+* **🔍 Keyword Highlighting**: Visually highlight active search terms within the release note descriptions to show users matches immediately.
+* **⌨️ Keyboard Navigation Shortcuts**: Autofocus search bar on page load, support `/` hotkey for search, and bind `Escape` key to close modals.
+* **📄 Skeleton Screen Loading**: Replace the traditional loading spinner with a shimmering skeleton card layout to minimize perceived load times.
+* **🔝 Scroll-to-Top Button**: Introduce a floating "Back to Top" button for quick navigation on deep scrollable lists.
+* **⏳ Animated Toast Progress**: Add a countdown indicator bar at the bottom of copy toasts to show users exactly when the notice will disappear.
+* **❌ Granular Search Resets**: Offer independent search clear actions so users don't lose active category filters when correcting a search typo.
+
